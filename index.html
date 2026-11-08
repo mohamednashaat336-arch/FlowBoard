@@ -1,12 +1,30 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="light" data-bs-theme="light">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#111827" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" content="#F5F7FA" />
     <meta name="description" content="FlowBoard project management demo workspace" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <title>FlowBoard — Project Management</title>
+    <script>
+      (function() {
+        try {
+          var raw = localStorage.getItem('flowboard-theme');
+          var theme = 'light';
+          if (raw) {
+            try { theme = JSON.parse(raw); } catch(e) { theme = raw; }
+          }
+          if (theme !== 'dark' && theme !== 'light') theme = 'light';
+          document.documentElement.setAttribute('data-theme', theme);
+          document.documentElement.setAttribute('data-bs-theme', theme);
+          document.documentElement.style.colorScheme = theme;
+          var meta = document.querySelector('meta[name="theme-color"]');
+          if (meta) meta.setAttribute('content', theme === 'dark' ? '#111827' : '#F5F7FA');
+        } catch(e) {}
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

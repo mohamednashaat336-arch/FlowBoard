@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Eye, EyeOff, Layers2 } from 'lucide-react'
+import { Check, Copy, Eye, EyeOff, Layers2, ShieldCheck } from 'lucide-react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import Button from '../components/common/Button.jsx'
 import ThemeToggle from '../components/common/ThemeToggle.jsx'
@@ -16,6 +16,36 @@ export default function DemoAccess({ mode = 'login' }) {
   const [rememberMe, setRememberMe] = useState(false)
   const [error, setError] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
+  const [copiedField, setCopiedField] = useState(null)
+
+  function handleCopy(text, field) {
+    if (navigator?.clipboard?.writeText) {
+      navigator.clipboard.writeText(text).then(() => {
+        setCopiedField(field)
+        setTimeout(() => setCopiedField(null), 2000)
+      }).catch(() => {
+        fallbackCopy(text, field)
+      })
+    } else {
+      fallbackCopy(text, field)
+    }
+  }
+
+  function fallbackCopy(text, field) {
+    try {
+      const textarea = document.createElement('textarea')
+      textarea.value = text
+      textarea.style.position = 'fixed'
+      textarea.style.opacity = '0'
+      document.body.appendChild(textarea)
+      textarea.select()
+      document.execCommand('copy')
+      document.body.removeChild(textarea)
+      setCopiedField(field)
+      setTimeout(() => setCopiedField(null), 2000)
+    } catch {
+    }
+  }
 
   async function enterDemo(event) {
     event.preventDefault()
@@ -67,6 +97,44 @@ export default function DemoAccess({ mode = 'login' }) {
       </form>
       <p className="fb-demo-access__switch">{isRegister ? 'Already have an account?' : 'New here?'} <Link to={isRegister ? '/login' : '/register'}>{isRegister ? 'Return to Login' : 'Register'}</Link></p>
     </section>
+    {!isRegister && (
+      <aside aria-label="Demo Owner Account" className="fb-demo-credentials-card">
+        <div className="fb-demo-credentials-card__header">
+          <ShieldCheck aria-hidden="true" className="fb-demo-credentials-card__icon" size={16} />
+          <span className="fb-demo-credentials-card__title">Demo Owner Account</span>
+        </div>
+        <div className="fb-demo-credentials-card__list">
+          <div className="fb-demo-credentials-card__item">
+            <span className="fb-demo-credentials-card__label">Email:</span>
+            <code className="fb-demo-credentials-card__value">Mohamed@flowboard.com</code>
+            <button
+              aria-label="Copy email"
+              className="fb-demo-credentials-card__copy"
+              onClick={() => handleCopy('Mohamed@flowboard.com', 'email')}
+              title="Copy email"
+              type="button"
+            >
+              {copiedField === 'email' ? <Check aria-hidden="true" size={13} /> : <Copy aria-hidden="true" size={13} />}
+              <span>{copiedField === 'email' ? 'Copied' : 'Copy'}</span>
+            </button>
+          </div>
+          <div className="fb-demo-credentials-card__item">
+            <span className="fb-demo-credentials-card__label">Password:</span>
+            <code className="fb-demo-credentials-card__value">mohamed123</code>
+            <button
+              aria-label="Copy password"
+              className="fb-demo-credentials-card__copy"
+              onClick={() => handleCopy('mohamed123', 'password')}
+              title="Copy password"
+              type="button"
+            >
+              {copiedField === 'password' ? <Check aria-hidden="true" size={13} /> : <Copy aria-hidden="true" size={13} />}
+              <span>{copiedField === 'password' ? 'Copied' : 'Copy'}</span>
+            </button>
+          </div>
+        </div>
+      </aside>
+    )}
     <p className="fb-demo-access__footer">FlowBoard stores accounts and workspace data locally in this browser.</p>
   </main>
 }
